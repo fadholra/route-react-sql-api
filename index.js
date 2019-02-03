@@ -11,7 +11,7 @@ var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
   password : '',
-  database : 'simple-crud-db'
+  database : 'route-react-sql'
 });
  
 connection.connect((err) => {
@@ -22,28 +22,20 @@ connection.connect((err) => {
 app.listen(4000, () => console.log('Running on port: 4000'));
 
 app.get('/', (req, res) => {
-	res.send('Hello');
+	res.send('Welcome to route-react-sql API');
 })
 
-//get data
-app.get('/test', (req, res) => {
-	connection.query('SELECT * FROM rute_perjalanan', function (err, result, fields) {
+// CRUD rute_perjalanan table
+// get data
+app.get('/rute', (req, res) => {
+	connection.query('SELECT * FROM rute_perjalanan ORDER BY no', function (err, result, fields) {
 		if (err) console.log(err);
 		res.json(result);
 	})
 });
 
-//delete data
-/*app.delete('/test/:no', (req, res) => {
-	var sql = 'DELETE FROM rute_perjalanan WHERE no = ?';
-	connection.query(sql, req.params.no, (err, result, fields) => {
-		if (err) throw err;
-		res.send('Delete no ' + req.params.no + ' success!');
-	})
-})*/
-
-//delete data
-app.get('/test/delete/:no', (req, res) => {
+// delete data
+app.get('/rute/delete/:no', (req, res) => {
 	var sql = `DELETE FROM rute_perjalanan WHERE no = ?`;
 	connection.query(sql, req.params.no, (err, result, fields) => {
 		if (err) console.log(err);
@@ -51,34 +43,51 @@ app.get('/test/delete/:no', (req, res) => {
 	})
 })
 
-//insert data
-/*app.post('/test', (req, res) => {
-	let x = req.body;
-	let y = [x.no, x.perjalanan];
-	var sql = 'INSERT INTO rute_perjalanan (no, perjalanan) VALUES (?, ?)';
-	connection.query(sql, y, (err, result, fields) => {
-		if (err) throw err;
-		res.send(y);
-	});
-})*/
-
-//insert data 
-app.get('/test/add', (req, res) => {
-	var { no, perjalanan } = req.query;
-	var sql = `INSERT INTO rute_perjalanan (no, perjalanan) VALUES (${no}, '${perjalanan}')`;
+// insert data 
+app.get('/rute/add', (req, res) => {
+	var { no, perjalanan, start_lat, start_lon, end_lat, end_lon } = req.query;
+	var sql = `INSERT INTO rute_perjalanan (no, perjalanan, start_latitude, start_longitude, end_latitude, end_longitude) VALUES (${no}, '${perjalanan}', '${start_lat}', '${start_lon}', '${end_lat}', '${end_lon}')`;
 	connection.query(sql, (err, result) => {
 		if (err) console.log(err);
 		res.send('successfully added perjalanan');
 	}) 
 })
 
-//update data
-app.get('/test/update/:no', (req, res) => {
-	let noDelete = req.params.no;
-	var { no, perjalanan } = req.query;
-	var sql = `UPDATE rute_perjalanan SET no = ${no}, perjalanan = '${perjalanan}' WHERE no = ${noDelete}`;
+// update data
+app.get('/rute/update/:no', (req, res) => {
+	let noUpdate = req.params.no;
+	var { no, perjalanan, start_lat, start_lon, end_lat, end_lon } = req.query;
+	var sql = `UPDATE rute_perjalanan SET no = ${no}, perjalanan = '${perjalanan}', start_latitude = '${start_lat}', start_longitude = '${start_lon}', end_latitude = '${end_lat}', end_longitude = '${end_lon}' WHERE no = ${noUpdate}`;
 	connection.query(sql, (err, result) => {
 		if (err) console.log(err);
 		res.send('Updated');
+	})
+})
+
+// CRUD waypoints table
+// insert data 
+app.get('/waypoints/add', (req, res) => {
+	var { no_rute, lat, lon } = req.query;
+	var sql = `INSERT INTO waypoints (no_rute, latitude, longitude) VALUES (${no_rute}, '${lat}', '${lon}')`;
+	connection.query(sql, (err, result) => {
+		if (err) console.log(err);
+		res.send('successfully added waypoint');
+	}) 
+})
+
+//get data
+app.get('/waypoints', (req, res) => {
+	connection.query('SELECT * FROM waypoints ORDER BY no_rute', function (err, result, fields) {
+		if (err) console.log(err);
+		res.json(result);
+	})
+});
+
+// delete data
+app.get('/waypoints/delete/:id', (req, res) => {
+	var sql = `DELETE FROM waypoints WHERE id = ?`;
+	connection.query(sql, req.params.id, (err, result) => {
+		if (err) console.log(err);
+		res.send('Delete a waypoint success!');
 	})
 })
